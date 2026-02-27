@@ -19,6 +19,7 @@
             width:25%;
             height:10vh;
         }
+        
 
     </style>
 </head>
@@ -30,18 +31,19 @@
         <button id="edgeButton"> Edge </button>
         <button id="deleteButton"> Delete </button>
         <button id="debugButton"> Debug </button>
-        <button id="renderButton"> Render </button>
-        <button id="exportButton"> Export </button>
+
+        <input type="text" id="kInput" placeholder="Input k..." />
+        <button id="calcEdges">Find Edges</button>
+        <div id="kCutsContainer"></div>
     </div>
-    <div>
-        <textarea id="inputBox", type = "text" class = "inputBox"> </textarea>
-    </div>
+    
 
     <script>
         // draw_mode can be node, edge, or erase
         let drawMode = "node";
         let selectedNode = null;
         let priorityInserts = []; // Stores removed node ids that have reinsert priority
+        let k_cuts = [];
 
         // Helper Functions
         function insertInOrder(list, x) { 
@@ -80,8 +82,10 @@
         const deleteButton = document.getElementById("deleteButton");
         const debugButton = document.getElementById("debugButton");
         const inputBox = document.getElementById("inputBox")
-        const renderButton = document.getElementById("renderButton");
-        const exportButton = document.getElementById("exportButton");
+
+        const kInput = document.getElementById("kInput");
+        const calcEdges = document.getElementById("calcEdges");
+        const kCutsContainer = document.getElementById("kCutsContainer");
 
         // Event Handlers
         nodeButton.addEventListener("click", function() {
@@ -121,7 +125,26 @@
             console.log(jsonToEdgeList());
         });
         // Export Button
-        exportButton.addEventListener("click", function() {
+        calcEdges.addEventListener("click", async () => {
+            let k = kInput.value;
+            try {
+                const response = await fetch("/algorithm-kcut", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ 
+                        data: jsonToEdgeList(),
+                        k: parseInt(k) 
+                    })
+                });
+
+                k_cuts = await response.json();
+                console.log("Response:", k_cuts);
+            } catch (err) {
+                console.error("Error:", error);
+            }
+
         });        
 
 
@@ -140,10 +163,7 @@
                 console.log('3 pressed, switching draw mode to delete');
                 drawMode="delete";
             clearSelectedNode();
-            } else if (event.key == 'e') {
-                console.log('e pressed, switching draw mode to delete');
-                drawMode="delete";
-            }
+            } 
         }
 
         // Create cytoscape instance
@@ -229,6 +249,10 @@
                 }
             }
         });
+
+        
+
+        
 
     // PRIORITY: 
     // TASK: CONVERT JSON TO EDGE LIST
