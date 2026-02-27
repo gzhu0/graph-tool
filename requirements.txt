@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+networkx
+jinja2
+python-multipart

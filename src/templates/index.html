@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
+    <style> 
+        /*Cytoscape Style */
+        #cy {
+        width: 70vw;
+        height: 70vh;
+        display: block;
+        border: solid;
+        border-width: 3px;
+        border-color: black;
+        }
+        .inputBox {
+            width:25%;
+            height:10vh;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="cy">  </div>
+
+    <div id="menu-bar">
+        <button id="nodeButton"> Vertex </button>
+        <button id="edgeButton"> Edge </button>
+        <button id="deleteButton"> Delete </button>
+        <button id="debugButton"> Debug </button>
+        <button id="renderButton"> Render </button>
+        <button id="exportButton"> Export </button>
+    </div>
+    <div>
+        <textarea id="inputBox", type = "text" class = "inputBox"> </textarea>
+    </div>
+
+    <script>
+        // draw_mode can be node, edge, or erase
+        let drawMode = "node";
+        let selectedNode = null;
+        let priorityInserts = []; // Stores removed node ids that have reinsert priority
+
+        // Helper Functions
+        function insertInOrder(list, x) { 
+            // Inserts in order into a list
+            for (let i = 0; i < list.length; i++) {
+                if (x < list[i]) {
+                    list.splice(i,0,x);
+                    return;
+                }
+                break;
+            }
+            list.push(x);
+        }
+
+        function clearSelectedNode() {
+            // Clears selected node and removes styling
+            selectedNode = null;
+        }
+
+        function jsonToEdgeList() {
+            // Converts cytoscape json into an edge list for api calling
+            let output = [];
+            let data = cy.json();
+            let edges = data.elements.edges
+            for (let edge of edges) {
+                let s = parseInt(edge.data.source);
+                let t = parseInt(edge.data.target);
+                output.push([s,t]);
+            }
+            return output
+        }
+        
+        // Button Elements
+        const nodeButton = document.getElementById("nodeButton");
+        const edgeButton = document.getElementById("edgeButton");
+        const deleteButton = document.getElementById("deleteButton");
+        const debugButton = document.getElementById("debugButton");
+        const inputBox = document.getElementById("inputBox")
+        const renderButton = document.getElementById("renderButton");
+        const exportButton = document.getElementById("exportButton");
+
+        // Event Handlers
+        nodeButton.addEventListener("click", function() {
+            drawMode = "node";
+            clearSelectedNode();
+        });
+        edgeButton.addEventListener("click", function() {
+            drawMode = "edge";
+        });
+        deleteButton.addEventListener("click", function() {
+            drawMode = "delete";
+            clearSelectedNode();
+        });
+        // !DEBUG FUNCTION
+        debugButton.addEventListener("click", function() {
+            out = ""
+            console.log("Draw Mode: ", drawMode)
+            console.log("Nodes:");
+            for (let node of cy.nodes()) {
+                out += node.data('id') + " ";
+            }
+            console.log(out);
+            console.log(cy.nodes());
+            out = "";
+            console.log("Edges:");
+            for (let edge of cy.edges()) {
+                out += edge.data('id') + " ";
+            }
+            console.log(out)
+            console.log(cy.edges());
+            if (selectedNode == null) console.log("selectedNode: Null");
+            else console.log("selectedNode:", selectedNode.data('id'));
+            console.log("Insert Queue", priorityInserts)
+            console.log("Json File:")
+            console.log(cy.json());
+            console.log("Edge List:")
+            console.log(jsonToEdgeList());
+        });
+        // Export Button
+        exportButton.addEventListener("click", function() {
+        });        
+
+
+        // Hotkeys
+        addEventListener("keydown", (event) => {})
+        onkeydown = (event) => {
+            if (event.key == '1') {
+                console.log('1 pressed, switching draw mode to node');
+                drawMode="node";
+            clearSelectedNode();
+            } else if (event.key == '2') {
+                console.log('2 pressed, switching draw mode to edge');
+                drawMode="edge";
+            clearSelectedNode();
+            } else if (event.key == '3') {
+                console.log('3 pressed, switching draw mode to delete');
+                drawMode="delete";
+            clearSelectedNode();
+            } else if (event.key == 'e') {
+                console.log('e pressed, switching draw mode to delete');
+                drawMode="delete";
+            }
+        }
+
+        // Create cytoscape instance
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+            style: [ 
+                {
+                selector: 'node', style: {
+                    'background-color': '#667',
+                    'label': 'data(id)'
+                }
+                },
+                {
+                selector: 'edge',
+                style: {
+                    'width': 3,
+                    'line-color': '#ccc',
+                    'target-arrow-color': '#ccc',
+                    'target-arrow-shape': 'none',
+                    'curve-style': 'bezier'
+                }
+                }
+            ],
+            layout: {
+                name: 'grid',
+                rows: 1
+            }
+        });
+
+        // Handling User Input
+        cy.on('tap', function(event)
+        {
+            
+            if (drawMode == "node"){
+                if (priorityInserts.length > 0) {
+                    nodeId = priorityInserts.shift();
+                } else {
+                    nodeId = cy.nodes().length+1;
+                }
+
+                cy.add({
+                    group: 'nodes',
+                    data: { id : nodeId },
+                    position: event.position
+                })
+                console.log("created node", cy.nodes().length);
+            }
+
+            else if (drawMode == 'edge'){
+                // Connect selected node with tapped node. If no tapped node, then select -> tapped
+                if (event.target != null && event.target != cy && event.target.isNode()) {
+                if (selectedNode == null) {
+                    selectedNode = event.target;
+                    console.log("selected node", selectedNode.id());
+                } else {
+                    // Standardizing edges so its min to max id
+                    source = Math.min(selectedNode.id(),event.target.id());
+                    target = Math.max(selectedNode.id(),event.target.id());
+
+                    // Edge ids are in the form source,sink
+                    edgeId = source.toString() + "," + target.toString();
+                    console.log("creating edge", edgeId);
+                    cy.add({
+                        group: 'edges',
+                        data: {id : edgeId, source: source, target: target}
+                    });
+                    selectedNode = null
+                }
+                }
+            }
+
+            else if (drawMode = "delete") {
+                if (event.target != null && event.target != cy && (event.target.isNode() || event.target.isEdge())) {
+                    console.log("Removing ", event.target.data('id'));
+                    if (event.target.isNode()) removedID = event.target.data('id');
+                    cy.remove(event.target);
+                    insertInOrder(priorityInserts, removedID);
+                    console.log('removed node', removedID);
+                    console.log('current removed list: ', priorityInserts);
+
+                    // 
+                    
+                }
+            }
+        });
+
+    // PRIORITY: 
+    // TASK: CONVERT JSON TO EDGE LIST
+    // TASK: C++ CODE TO FIND ALL THE CUTS
+    // TASK: SEND BACK A LIST OF ALL CUTS
+        // POST: 
+
+    // TASK: HIGHLIGHT SELECTED NODE AND CLEAR SELECTED NODE 
+    // TASK: TEXT TO GRAPH
+    // TASK: RUN ALGORITHMS
+    // TASK: CREATE ALGORITHMS
+        // FIND K-CUTS
+        // APPROXIMATE CONGESTION
+    // TASK: OUTPUT BOX
+    // TASK: OUTPUT DISPLAY
+    // TASK: OPTION BAR
+        // Multigraph Option
+        // Self Loop Option
+    // TASK: QOL
+        // Highlight Nodes
+        // Highlight Buttons
+        // Make Pretty
+
+    // Add multigraph option?
+    </script>
+</body>
+</html>
+
