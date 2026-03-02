@@ -19,6 +19,12 @@
             width:25%;
             height:10vh;
         }
+        .cutItem {
+            width: 30vh;
+            font-size: 1.5rem;
+            border: 2px black;
+        }
+
         
 
     </style>
@@ -34,7 +40,8 @@
 
         <input type="text" id="kInput" placeholder="Input k..." />
         <button id="calcEdges">Find Edges</button>
-        <div id="kCutsContainer"></div>
+        
+        <div id="cutsContainer"></div>
     </div>
     
 
@@ -75,6 +82,33 @@
             }
             return output
         }
+
+            //ADDADDADD
+            function highlightCut(partitions) {
+            A = partitions[0]
+            B = partitions[1]
+            console.log("Highlighting partitions:");
+            console.log(A);
+            console.log(B);
+            for (let nodeId of A) {
+                console.log(nodeId);
+                cy.getElementById(nodeId).addClass('redNode');
+            }
+            for (let nodeId of B) {
+                cy.getElementById(nodeId).addClass('blueNode');
+                console.log(cy.getElementById(nodeId))
+            }
+            
+            // Use cy.batch for performance (updates DOM once at the end)
+            
+            }
+
+            function cleanGraph() {
+                // Removes classes from every node
+                cy.nodes().removeClass('redNode blueNode');
+                
+                
+            }
         
         // Button Elements
         const nodeButton = document.getElementById("nodeButton");
@@ -85,7 +119,7 @@
 
         const kInput = document.getElementById("kInput");
         const calcEdges = document.getElementById("calcEdges");
-        const kCutsContainer = document.getElementById("kCutsContainer");
+        const cutsContainer = document.getElementById("cutsContainer");
 
         // Event Handlers
         nodeButton.addEventListener("click", function() {
@@ -123,6 +157,8 @@
             console.log(cy.json());
             console.log("Edge List:")
             console.log(jsonToEdgeList());
+            console.log('Clearing graph')
+            cleanGraph();
         });
         // Export Button
         calcEdges.addEventListener("click", async () => {
@@ -141,8 +177,40 @@
 
                 k_cuts = await response.json();
                 console.log("Response:", k_cuts);
+
+        
+        // Create Cut Container
+        cutsContainer.innerHTML = "";
+
+        k_cuts.forEach((cut, index) => {
+
+            text = "";
+            cut.forEach(partition => {
+                console.log("displaying partition", partition)
+                text += "(" + partition.join(", ") + ") ";
+            });
+
+            const item = document.createElement('div');
+            item.className = 'cutItem';
+            item.innerText = `Cut ${index + 1}: ${text}`;
+
+            // 2. Add Hover Events
+            item.addEventListener('mouseenter', () => {
+                console.log("Hovering over cut", item.innerText);
+                highlightCut(cut);
+            });
+
+            item.addEventListener('mouseleave', () => {
+                cleanGraph();
+            });
+
+            cutsContainer.appendChild(item);
+        });
+
+
+
             } catch (err) {
-                console.error("Error:", error);
+                console.error("Error:", err);
             }
 
         });        
@@ -185,7 +253,23 @@
                     'target-arrow-shape': 'none',
                     'curve-style': 'bezier'
                 }
-                }
+                },
+                {
+                    selector: '.blueNode',
+                    style: {
+                        'background-color': 'blue',
+                        'border-width': 2,
+                        'border-color': 'black'
+                    }
+                },
+                {
+                    selector: '.redNode',
+                    style: {
+                        'background-color': 'red',
+                        'border-width': 2,
+                        'border-color': 'black'
+                    }
+                },
             ],
             layout: {
                 name: 'grid',
@@ -255,16 +339,11 @@
         
 
     // PRIORITY: 
-    // TASK: CONVERT JSON TO EDGE LIST
-    // TASK: C++ CODE TO FIND ALL THE CUTS
-    // TASK: SEND BACK A LIST OF ALL CUTS
-        // POST: 
+    // TASK: MAKE K-CUTS BUTTON WORK WHEN PRESSED A SECOND ITME
 
-    // TASK: HIGHLIGHT SELECTED NODE AND CLEAR SELECTED NODE 
     // TASK: TEXT TO GRAPH
     // TASK: RUN ALGORITHMS
     // TASK: CREATE ALGORITHMS
-        // FIND K-CUTS
         // APPROXIMATE CONGESTION
     // TASK: OUTPUT BOX
     // TASK: OUTPUT DISPLAY
