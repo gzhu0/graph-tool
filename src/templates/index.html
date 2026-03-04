@@ -6,6 +6,7 @@
     <title>Graph Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
     <style> 
+        
         /*Cytoscape Style */
         #cy {
         width: 70vw;
@@ -15,7 +16,7 @@
         border-width: 3px;
         border-color: black;
         }
-        .inputBox {
+        .edgeBox {
             width:25%;
             height:10vh;
         }
@@ -25,18 +26,18 @@
             border: 2px black;
         }
 
-        
-
     </style>
 </head>
 <body>
     <div id="cy">  </div>
 
     <div id="menu-bar">
-        <button id="nodeButton"> Vertex </button>
-        <button id="edgeButton"> Edge </button>
-        <button id="deleteButton"> Delete </button>
-        <button id="debugButton"> Debug </button>
+        <button id="nodeButton" class = "button"> Vertex </button>
+        <button id="edgeButton" class = "button"> Edge </button>
+        <button id="deleteButton" class = "button"> Delete </button>
+        <button id="debugButton" class = "button"> Debug </button>
+        <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]"></textarea>
+        <button id="createGraphButton"> Create Graph </button>
 
         <input type="text" id="kInput" placeholder="Input k..." />
         <button id="calcEdges">Find Edges</button>
@@ -75,47 +76,53 @@
             let output = [];
             let data = cy.json();
             let edges = data.elements.edges
-            for (let edge of edges) {
-                let s = parseInt(edge.data.source);
-                let t = parseInt(edge.data.target);
-                output.push([s,t]);
-            }
+            if (edges) {
+                for (let edge of edges) {
+                    let s = parseInt(edge.data.source);
+                    let t = parseInt(edge.data.target);
+                    output.push([s,t]);
+                }
+        }
             return output
         }
 
-            //ADDADDADD
-            function highlightCut(partitions) {
-            A = partitions[0]
-            B = partitions[1]
-            console.log("Highlighting partitions:");
-            console.log(A);
-            console.log(B);
-            for (let nodeId of A) {
-                console.log(nodeId);
-                cy.getElementById(nodeId).addClass('redNode');
-            }
-            for (let nodeId of B) {
-                cy.getElementById(nodeId).addClass('blueNode');
-                console.log(cy.getElementById(nodeId))
-            }
-            
-            // Use cy.batch for performance (updates DOM once at the end)
-            
-            }
-
-            function cleanGraph() {
-                // Removes classes from every node
-                cy.nodes().removeClass('redNode blueNode');
-                
-                
-            }
+        function highlightCut(partitions) {     
+            // Given 2 partition of nodes, highlights them in different colors
+        A = partitions[0]
+        B = partitions[1]
+        console.log("Highlighting partitions:");
+        console.log(A);
+        console.log(B);
+        for (let nodeId of A) {
+            console.log(nodeId);
+            cy.getElementById(nodeId).addClass('redNode');
+        }
+        for (let nodeId of B) {
+            cy.getElementById(nodeId).addClass('blueNode');
+            console.log(cy.getElementById(nodeId))
+        }
         
+        }
+
+        function cleanGraph() {
+            // Removes classes from every node
+            cy.nodes().removeClass('redNode blueNode');
+            
+        }
+
+        function updateEdgeOutput() {
+            // Outputs the list of edges in the graph
+            edges = JSON.stringify(jsonToEdgeList())
+            edgeBox.value = edges;
+        }
+    
         // Button Elements
         const nodeButton = document.getElementById("nodeButton");
         const edgeButton = document.getElementById("edgeButton");
         const deleteButton = document.getElementById("deleteButton");
         const debugButton = document.getElementById("debugButton");
-        const inputBox = document.getElementById("inputBox")
+        const edgeBox = document.getElementById("edgeBox");
+        const createGraphButton = document.getElementById("createGraphButton");
 
         const kInput = document.getElementById("kInput");
         const calcEdges = document.getElementById("calcEdges");
@@ -160,8 +167,72 @@
             console.log('Clearing graph')
             cleanGraph();
         });
+
+        createGraphButton.addEventListener("click", function() {
+            edges = JSON.parse(edgeBox.value);
+            console.log("Creating a graph with", edges)
+            cy.elements().remove();
+
+            let nodes = new Set();
+
+            edges.forEach(([u,v]) => {
+                if (!nodes.has(u)) {
+                    cy.add({group: 'nodes', data: {id: u}});
+                }
+                if (!nodes.has(v)) {
+                    cy.add({group: 'nodes', data: {id: v}});
+                }
+                cy.add({group:'edges', data: {source: u, target: v}});
+            }
+            
+        )
+            const layout = cy.layout({ name: 'cose' });
+            layout.on('layoutstop', function() {
+                cy.zoom(cy.zoom() * 0.7);
+                cy.center();
+            });
+            layout.run();
+        });
+
+        // Create Cuts Container
+        function createCutContainer(k_cuts) {
+            cutsContainer.innerHTML = "";
+
+            // Check if no cuts
+            if (k_cuts.length == 0) {
+                const item = document.createElement('div');
+                console.log("No Cuts Found")
+                item.innerText = "No cuts found."
+                cutsContainer.appendChild(item);
+            }
+
+            k_cuts.forEach((cut, index) => {
+
+                text = "";
+                cut.forEach(partition => {
+                    console.log("displaying partition", partition)
+                    text += "(" + partition.join(", ") + ") ";
+                });
+
+                const item = document.createElement('div');
+                item.className = 'cutItem';
+                item.innerText = "Cut" + (index + 1) + ":" + text;
+
+                item.addEventListener('mouseenter', () => {
+                    console.log("Hovering over cut", item.innerText);
+                    highlightCut(cut);
+                });
+
+                item.addEventListener('mouseleave', () => {
+                    cleanGraph();
+                });
+
+                cutsContainer.appendChild(item);
+            });
+        }
+
         // Export Button
-        calcEdges.addEventListener("click", async () => {
+        calcEdges.addEventListener("tap", async () => {
             let k = kInput.value;
             try {
                 const response = await fetch("/algorithm-kcut", {
@@ -177,62 +248,13 @@
 
                 k_cuts = await response.json();
                 console.log("Response:", k_cuts);
-
-        
-        // Create Cut Container
-        cutsContainer.innerHTML = "";
-
-        k_cuts.forEach((cut, index) => {
-
-            text = "";
-            cut.forEach(partition => {
-                console.log("displaying partition", partition)
-                text += "(" + partition.join(", ") + ") ";
-            });
-
-            const item = document.createElement('div');
-            item.className = 'cutItem';
-            item.innerText = `Cut ${index + 1}: ${text}`;
-
-            // 2. Add Hover Events
-            item.addEventListener('mouseenter', () => {
-                console.log("Hovering over cut", item.innerText);
-                highlightCut(cut);
-            });
-
-            item.addEventListener('mouseleave', () => {
-                cleanGraph();
-            });
-
-            cutsContainer.appendChild(item);
-        });
-
-
+                // Create cut container
+                createCutContainer(k_cuts);
 
             } catch (err) {
                 console.error("Error:", err);
             }
-
         });        
-
-
-        // Hotkeys
-        addEventListener("keydown", (event) => {})
-        onkeydown = (event) => {
-            if (event.key == '1') {
-                console.log('1 pressed, switching draw mode to node');
-                drawMode="node";
-            clearSelectedNode();
-            } else if (event.key == '2') {
-                console.log('2 pressed, switching draw mode to edge');
-                drawMode="edge";
-            clearSelectedNode();
-            } else if (event.key == '3') {
-                console.log('3 pressed, switching draw mode to delete');
-                drawMode="delete";
-            clearSelectedNode();
-            } 
-        }
 
         // Create cytoscape instance
         var cy = cytoscape({
@@ -322,31 +344,40 @@
             else if (drawMode = "delete") {
                 if (event.target != null && event.target != cy && (event.target.isNode() || event.target.isEdge())) {
                     console.log("Removing ", event.target.data('id'));
-                    if (event.target.isNode()) removedID = event.target.data('id');
+                    removedID = event.target.data('id');
                     cy.remove(event.target);
-                    insertInOrder(priorityInserts, removedID);
                     console.log('removed node', removedID);
-                    console.log('current removed list: ', priorityInserts);
-
-                    // 
-                    
+                    if (event.target.isNode()) {
+                        insertInOrder(priorityInserts, removedID);
+                        console.log('current removed list: ', priorityInserts);
+                    }
                 }
             }
-        });
+            updateEdgeOutput();
+         });
 
-        
 
-        
+        // Hotkeys
+        addEventListener("keydown", (event) => {})
+        onkeydown = (event) => {
+            if (event.key == '1') {
+                console.log('1 pressed, switching draw mode to node');
+                drawMode="node";
+            clearSelectedNode();
+            } else if (event.key == '2') {
+                console.log('2 pressed, switching draw mode to edge');
+                drawMode="edge";
+            clearSelectedNode();
+            } else if (event.key == '3') {
+                console.log('3 pressed, switching draw mode to delete');
+                drawMode="delete";
+            clearSelectedNode();
+            } 
+        }
 
     // PRIORITY: 
-    // TASK: MAKE K-CUTS BUTTON WORK WHEN PRESSED A SECOND ITME
-
-    // TASK: TEXT TO GRAPH
-    // TASK: RUN ALGORITHMS
-    // TASK: CREATE ALGORITHMS
-        // APPROXIMATE CONGESTION
-    // TASK: OUTPUT BOX
-    // TASK: OUTPUT DISPLAY
+    // TASK: DRAWING MODE BUTTON HIGHLIGHT
+    // TASK: APPROXIMATE CONGESTION ALGORITHM
     // TASK: OPTION BAR
         // Multigraph Option
         // Self Loop Option

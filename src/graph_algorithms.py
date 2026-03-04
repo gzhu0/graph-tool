@@ -8,6 +8,9 @@ import networkx as nx
 import itertools
 
 def k_cut(data: list[list], k: int):
+    '''
+    Returns all k cuts in the graph
+    '''
     all_edges = [tuple(x) for x in data]
     vertices = set(itertools.chain.from_iterable(data))
     n = len(vertices)
@@ -48,11 +51,6 @@ def k_cut(data: list[list], k: int):
                     set_A.append(v)
                 else:
                     set_B.append(v)
-
-                # if mappings[v] in A:
-                #     set_A.append(v)
-                # elif mappings[v] in B:
-                #     set_B.append(v)
             print(set_A,set_B)
             cuts_return.append([set_A, set_B])
 

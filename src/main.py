@@ -21,6 +21,6 @@ def algorithm_kcut(request: algorithm_kcut_req):
     '''
     return src.graph_algorithms.k_cut(request.data,request.k)
 
-    
+
 
 
