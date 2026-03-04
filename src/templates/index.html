@@ -40,7 +40,7 @@
         <button id="createGraphButton"> Create Graph </button>
 
         <input type="text" id="kInput" placeholder="Input k..." />
-        <button id="calcEdges">Find Edges</button>
+        <button id="kCutsButton">Find Edges</button>
         
         <div id="cutsContainer"></div>
     </div>
@@ -51,7 +51,6 @@
         let drawMode = "node";
         let selectedNode = null;
         let priorityInserts = []; // Stores removed node ids that have reinsert priority
-        let k_cuts = [];
 
         // Helper Functions
         function insertInOrder(list, x) { 
@@ -125,7 +124,7 @@
         const createGraphButton = document.getElementById("createGraphButton");
 
         const kInput = document.getElementById("kInput");
-        const calcEdges = document.getElementById("calcEdges");
+        const kCutsButton = document.getElementById("kCutsButton");
         const cutsContainer = document.getElementById("cutsContainer");
 
         // Event Handlers
@@ -140,7 +139,6 @@
             drawMode = "delete";
             clearSelectedNode();
         });
-        // !DEBUG FUNCTION
         debugButton.addEventListener("click", function() {
             out = ""
             console.log("Draw Mode: ", drawMode)
@@ -167,7 +165,6 @@
             console.log('Clearing graph')
             cleanGraph();
         });
-
         createGraphButton.addEventListener("click", function() {
             edges = JSON.parse(edgeBox.value);
             console.log("Creating a graph with", edges)
@@ -231,8 +228,8 @@
             });
         }
 
-        // Export Button
-        calcEdges.addEventListener("tap", async () => {
+        // Find k-Cuts Button
+        kCutsButton.addEventListener("click", async () => {
             let k = kInput.value;
             try {
                 const response = await fetch("/algorithm-kcut", {
@@ -309,7 +306,6 @@
                 } else {
                     nodeId = cy.nodes().length+1;
                 }
-
                 cy.add({
                     group: 'nodes',
                     data: { id : nodeId },
@@ -331,17 +327,24 @@
 
                     // Edge ids are in the form source,sink
                     edgeId = source.toString() + "," + target.toString();
-                    console.log("creating edge", edgeId);
-                    cy.add({
-                        group: 'edges',
-                        data: {id : edgeId, source: source, target: target}
-                    });
+                    if (cy.getElementById(edgeId).length > 0) {
+                        console.log("edge", edgeId, "exists");
+                        selectedNode = null
+                    }
+                    else {
+                        console.log("creating edge", edgeId);
+                        cy.add({
+                            group: 'edges',
+                            data: {id : edgeId, source: source, target: target}
+                        });
+                    }
                     selectedNode = null
+
                 }
                 }
             }
 
-            else if (drawMode = "delete") {
+            else if (drawMode == "delete") {
                 if (event.target != null && event.target != cy && (event.target.isNode() || event.target.isEdge())) {
                     console.log("Removing ", event.target.data('id'));
                     removedID = event.target.data('id');
@@ -375,16 +378,18 @@
             } 
         }
 
-    // PRIORITY: 
-    // TASK: DRAWING MODE BUTTON HIGHLIGHT
+    // TASKS
+    // Styling / Restructure HTML for scalability
+    // Highlight Nodes & Buttons
+    // Option Bar: Multigraph
+    // Find K-Edge Connected Components
+
     // TASK: APPROXIMATE CONGESTION ALGORITHM
+        // https://drops.dagstuhl.de/storage/00lipics/lipics-vol327-stacs2025/LIPIcs.STACS.2025.63/LIPIcs.STACS.2025.63.pdf
+
     // TASK: OPTION BAR
         // Multigraph Option
-        // Self Loop Option
-    // TASK: QOL
-        // Highlight Nodes
-        // Highlight Buttons
-        // Make Pretty
+
 
     // Add multigraph option?
     </script>
