@@ -1,26 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graph Tool</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
-    <link rel="stylesheet" href="../static/css/style.css">
-</head>
-    <body>
-        <div id="cy">  </div>
-        <div id="menu-bar">
-            <button id="nodeButton" class = "button"> Vertex </button>
-            <button id="edgeButton" class = "button"> Edge </button>
-            <button id="deleteButton" class = "button"> Delete </button>
-            <button id="debugButton" class = "button"> Debug </button>
-            <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]"></textarea>
-            <button id="createGraphButton"> Create Graph </button>
-            <input type="text" id="kInput" placeholder="Input k..." />
-            <button id="kCutsButton">Find Edges</button>
-            <div id="cutsContainer"></div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Graph Tool</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
+        <link rel="stylesheet" href="{{ url_for('static', path='dist/styles.css') }}">
+    </head>
+    
+    <body class="h-screen w-screen flex flex-col p-6">
+        <div class="flex justify-between items-center border-b-2 border-black pb-2 mb-4">
+            <div class="text-2xl font-bold">Graph Tool</div>
+            <a href="https://github.com/gzhu0/graph-tool" target="_blank">
+                <img src="https://cdn.simpleicons.org/github" class="w-8 h-8 hover:opacity-60" />
+            </a>
         </div>
-        <script type="module" src="../static/js/main.js"></script>
+        <div class="grid grid-cols-[1fr_4fr_1fr] gap-4 p-4 h-full">
+
+            <!-- Left Column -->
+            <div class="flex flex-col gap-2">
+                <h2 class="header">Draw</h2>
+                <button id="nodeButton" class = "button">Vertex (v)</button>
+                <button id="edgeButton" class = "button">Edge (e)</button>
+                <button id="deleteButton" class = "button">Delete (d)</button>
+                <h2 class="header">Graph</h2>
+                <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]" class="border p-2 h-24"></textarea>
+                <button id="createGraphButton" class = "button">Create Graph</button>
+                <button id="debugButton" class = "button">Debug</button>
+            </div>
+
+            <!-- Middle Column -->
+            <div id="cy" class="border-2 rounded border-black w-full h-full"></div>
+
+            <!-- Right Column -->
+            <div class="flex flex-col gap-2">
+                <h2 class="header">Algorithms</h2>
+                    <h2 class="header">K Cuts</h2>
+                    <input type="text" id="kInput" placeholder="Input k..." class="border p-2"/>
+                    <button id="kCutsButton" class = button>Find Cuts</button>
+                    <div id="cutsContainer" class="flex flex-col gap-1 mt-2"></div>
+            </div>
+
+        </div>
+
+        <script type="module" src="{{ url_for('static', path='js/main.js') }}"></script>
     </body>
 </html>
 

@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .button {
+        @apply rounded-md px-4 py-2 border-2 border-black bg-gray-100 hover:bg-gray-200;
+    }
+    .header {
+        @apply text-lg font-bold
+    }
+}
