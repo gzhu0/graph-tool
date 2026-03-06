@@ -2,7 +2,6 @@
 
 @layer components {
     .button {
-        @reference "tailwindcss";
         border-radius: 0.375rem;
         padding: 0.5rem 1rem;
         border: 2px solid black;
