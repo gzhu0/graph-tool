@@ -5,8 +5,8 @@ import src.graph_algorithms
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="src\\static"), name="static")
-templates = Jinja2Templates(directory="src\\templates")
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
+templates = Jinja2Templates(directory="src/templates")
 
 class algorithm_kcut_req(BaseModel):
     data: list[list[int]] 
