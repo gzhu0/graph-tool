@@ -72,7 +72,9 @@ export const cy = cytoscape({
 // Graph Utility Functions
 export function clearSelectedNode() {
     // Clears selected node and removes styling
-    selectedNode.removeClass('selectedNode');
+    if (selectedNode) {
+        selectedNode.removeClass('selectedNode');
+    }
     selectedNode = null;
 }
 

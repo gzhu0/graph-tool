@@ -23,13 +23,16 @@ const cutsContainer = document.getElementById("cutsContainer");
 // Event Handlers
 nodeButton.addEventListener("click", function() {
     drawMode = "node";
+    selectButton(nodeButton);
     Graph.clearSelectedNode();
 });
 edgeButton.addEventListener("click", function() {
     drawMode = "edge";
+    selectButton(edgeButton);
 });
 deleteButton.addEventListener("click", function() {
     drawMode = "delete";
+    selectButton(deleteButton);
     Graph.clearSelectedNode();
 });
 debugButton.addEventListener("click", function() {
@@ -76,6 +79,11 @@ export function updateEdgeOutput() {
     // Outputs the list of edges in the graph
     let edges = JSON.stringify(Graph.jsonToEdgeList())
     edgeBox.value = edges;
+}
+
+function selectButton(button) {
+    [nodeButton, edgeButton, deleteButton].forEach(button => button.classList.remove('buttonSelected'));
+    button.classList.add('buttonSelected');
 }
 
 function createCutContainer(k_cuts) {
