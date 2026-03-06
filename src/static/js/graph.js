@@ -10,11 +10,23 @@ export let priorityInserts = []; // Stores removed node ids that have reinsert p
 // Create cytoscape instance
 export const cy = cytoscape({
     container: document.getElementById('cy'),
-    style: [ 
+    zoom: 1.5,
+    selector: 'node:active',
+    style: {
+        'overlay-opacity': 0,
+        'overlay-color': 'transparent',
+        'overlay-padding': 0,
+    },
+        style: [ 
         {
         selector: 'node', style: {
-            'background-color': '#667',
-            'label': 'data(id)'
+            'background-color': '#fff',
+            'border-width': 2,
+            'border-color': '#000',
+            'label': 'data(id)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'color': '#000',
         }
         },
         {
@@ -30,7 +42,7 @@ export const cy = cytoscape({
         {
             selector: '.blueNode',
             style: {
-                'background-color': 'blue',
+                'background-color': '#ADD8E6',
                 'border-width': 2,
                 'border-color': 'black'
             }
@@ -38,8 +50,15 @@ export const cy = cytoscape({
         {
             selector: '.redNode',
             style: {
-                'background-color': 'red',
+                'background-color': '#ff8080',
                 'border-width': 2,
+                'border-color': 'black'
+            }
+        },
+        {
+            selector: '.selectedNode',
+            style: {
+                'border-width': 4,
                 'border-color': 'black'
             }
         },
@@ -53,6 +72,7 @@ export const cy = cytoscape({
 // Graph Utility Functions
 export function clearSelectedNode() {
     // Clears selected node and removes styling
+    selectedNode.removeClass('selectedNode');
     selectedNode = null;
 }
 
@@ -151,6 +171,7 @@ export function drawEdge(event) {
     if (event.target != null && event.target != cy && event.target.isNode()) {
     if (selectedNode == null) {
         selectedNode = event.target;
+        selectedNode.addClass('selectedNode');
         console.log("selected node", selectedNode.id());
     } else {
         // Standardizing edges so its min to max id
@@ -163,7 +184,6 @@ export function drawEdge(event) {
         let edgeId = source.toString() + "," + target.toString();
         if (cy.getElementById(edgeId).length > 0) {
             console.log("edge", edgeId, "exists");
-            selectedNode = null
         }
         else {
             console.log("creating edge", edgeId);
@@ -172,7 +192,7 @@ export function drawEdge(event) {
                 data: {id : edgeId, source: source, target: target}
             });
         }
-        selectedNode = null
+        clearSelectedNode();
 
     }
     }

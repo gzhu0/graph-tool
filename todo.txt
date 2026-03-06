@@ -1,14 +1,7 @@
     // TASKS
-    // Styling / Restructure HTML for scalability
     // Highlight Nodes & Buttons
     // Option Bar: Multigraph
     // Find K-Edge Connected Components
 
     // TASK: APPROXIMATE CONGESTION ALGORITHM
         // https://drops.dagstuhl.de/storage/00lipics/lipics-vol327-stacs2025/LIPIcs.STACS.2025.63/LIPIcs.STACS.2025.63.pdf
-
-    // TASK: OPTION BAR
-        // Multigraph Option
-
-
-    // Add multigraph option?

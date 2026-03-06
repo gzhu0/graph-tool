@@ -1,6 +1,7 @@
 # Extra
 reference
 node_modules
+todo
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
