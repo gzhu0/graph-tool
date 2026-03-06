@@ -11,11 +11,14 @@ def k_cut(data: list[list], k: int):
     '''
     Returns all k cuts in the graph
     '''
-    all_edges = [tuple(x) for x in data]
+    all_edges = [tuple(x) for x in data if x[0] != x[1]]
+    
+
     vertices = set(itertools.chain.from_iterable(data))
     n = len(vertices)
     cut_count = 0
     cuts_return = []
+
 
     for cut in itertools.combinations(data, k):
         cut = [tuple(x) for x in cut]
