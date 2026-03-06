@@ -2,8 +2,10 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import src.graph_algorithms
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="src\\static"), name="static")
 templates = Jinja2Templates(directory="src\\templates")
 
 class algorithm_kcut_req(BaseModel):
