@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 @layer components {
     .button {
         border-radius: 0.375rem;
@@ -16,5 +17,8 @@
     }
     .buttonSelected:hover {
         background-color: #747474;
+    }
+    .header {
+        font-weight: bold !important;
     }
 }

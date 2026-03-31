@@ -20,6 +20,11 @@ const kInput = document.getElementById("kInput");
 const kCutsButton = document.getElementById("kCutsButton");
 const cutsContainer = document.getElementById("cutsContainer");
 
+const kInput2 = document.getElementById("kInput2");
+const kComponentsButton = document.getElementById("kComponentsButton");
+const componentsContainer = document.getElementById("kComponentsContainer");
+
+
 // Event Handlers
 nodeButton.addEventListener("click", function() {
     drawMode = "node";
@@ -87,7 +92,7 @@ function selectButton(button) {
 }
 
 function createCutContainer(k_cuts) {
-    cutsContainer.innerHTML = "";
+    cutsContainer.innerHTML = "Cuts:";
 
     // Check if no cuts
     if (k_cuts.length == 0) {
@@ -107,7 +112,7 @@ function createCutContainer(k_cuts) {
 
         const item = document.createElement('div');
         item.className = 'cutItem';
-        item.innerText = "Cut" + (index + 1) + ":" + text;
+        item.innerText = text;
 
         item.addEventListener('mouseenter', () => {
             console.log("Hovering over cut", item.innerText);
@@ -122,9 +127,44 @@ function createCutContainer(k_cuts) {
     });
 }
 
+function createComponentContainer(k_components) {
+    componentsContainer.innerHTML = "Components:";
+
+    if (k_components.length == 0) {
+        const item = document.createElement('div');
+        console.log("No Components Found")
+        item.innerText = "No Components found."
+        componentsContainer.appendChild(item);
+    }
+
+    k_components.forEach((cut, index) => {
+
+        let text = "";
+        cut.forEach(partition => {
+            console.log("displaying partition", partition)
+            text += "(" + partition.join(", ") + ") ";
+        });
+
+        const item = document.createElement('div');
+        item.className = 'cutItem';
+        item.innerText = text;
+
+        item.addEventListener('mouseenter', () => {
+            console.log("Hovering over cut", item.innerText, cut);
+            Graph.highlightAny(cut);
+        });
+
+        item.addEventListener('mouseleave', () => {
+            Graph.cleanGraph();
+        });
+
+        componentsContainer.appendChild(item);
+    });
+}
+
 // API CALLS
 
-// Find k cuts
+//Find k cuts
 kCutsButton.addEventListener("click", async () => {
     let k = kInput.value;
     const body = {
@@ -149,7 +189,36 @@ kCutsButton.addEventListener("click", async () => {
     } catch (err) {
         console.error("Error:", err);
     }
-});        
+}); 
+
+//Find k components
+kComponentsButton.addEventListener("click", async () => {
+    let k = kInput2.value;
+    const body = {
+        data: Graph.jsonToEdgeList(),
+        k: parseInt(k) 
+    }
+    console.log("POST: sending ", body);
+    try {
+        const response = await fetch("/algorithm-kcomponents", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        let k_components = await response.json();
+        console.log("Response:", k_components);
+
+        createComponentContainer(k_components);
+
+    } catch (err) {
+        console.error("Error:", err);
+    }
+}); 
+
+
 
 // Graph Interaction
 cy.on('tap', function(event)

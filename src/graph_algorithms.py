@@ -6,6 +6,11 @@ from collections import defaultdict
 import itertools
 import networkx as nx
 import itertools
+import igraph as ig
+import random
+import math
+
+# K-Cut Algorithm ###
 
 def k_cut(data: list[list], k: int):
     '''
@@ -21,8 +26,8 @@ def k_cut(data: list[list], k: int):
 
 
     for cut in itertools.combinations(data, k):
-        cut = [tuple(x) for x in cut]
-        edges = [x for x in all_edges if x not in cut]
+        cut_set = set(tuple(x) for x in cut)
+        edges = [x for x in all_edges if tuple(x) not in cut_set]
 
         g = nx.Graph()
         g.add_nodes_from(range(n))
@@ -37,6 +42,7 @@ def k_cut(data: list[list], k: int):
                 mappings[v] = component[0]
             for v in component[1:]: # We merge everything to first node
                 contracted = nx.contracted_nodes(contracted, component[0], v, self_loops=False)
+
         # Remapping each vertex
         for u,v in cut:
             new_u = mappings[u]
@@ -59,3 +65,24 @@ def k_cut(data: list[list], k: int):
 
     print(cut_count, "cuts found.")
     return cuts_return
+
+# K-Edge-Connected Components ###
+
+def k_edge_connected_components(data: list[list], k: int):
+    '''
+    Returns each k edge connected compoennts in the graph
+    '''
+
+    edges = [tuple(x) for x in data if x[0] != x[1]]
+    vertices = set(itertools.chain.from_iterable(data))
+    # Create Graph
+    g = nx.Graph()
+    n = len(vertices)
+    g.add_nodes_from(range(n))
+    g.add_edges_from(edges)
+    # Get Components
+    components = [sorted(x) for x in nx.k_edge_components(g, k=k) if len(x) > 1]
+
+    # Filter Out Components
+    print(f"components {components}")
+    return([components])

@@ -6,6 +6,7 @@
         <title>Graph Tool</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
         <link rel="stylesheet" href="{{ url_for('static', path='dist/styles.css') }}">
+        
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✒️</text></svg>">
     </head>
     
@@ -21,11 +22,11 @@
 
             <!-- Left Column -->
             <div class="flex flex-col gap-2">
-                <h2 class="header">Draw</h2>
+                <h2 class="header font-bold">Draw</h2>
                 <button id="nodeButton" class = "button">Vertex (v)</button>
                 <button id="edgeButton" class = "button">Edge (e)</button>
                 <button id="deleteButton" class = "button">Delete (d)</button>
-                <h2 class="header">Graph</h2>
+                <h2 class="header font-bold">Graph</h2>
                 <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]" class="border p-2 h-24"></textarea>
                 <button id="createGraphButton" class = "button">Create Graph</button>
                 <button id="debugButton" class = "button">Debug</button>
@@ -36,11 +37,23 @@
 
             <!-- Right Column -->
             <div class="flex flex-col gap-2">
-                <h2 class="header">Algorithms</h2>
-                    <h2 class="header">K-Cuts</h2>
+                <h2 class="header font-bold">Algorithms</h2>
+
+                    <h2 class="header font-bold">K-Cuts</h2>
                     <input type="text" id="kInput" placeholder="Input k..." class="border p-2"/>
                     <button id="kCutsButton" class = button>Find Cuts</button>
                     <div id="cutsContainer" class="flex flex-col gap-1 mt-2"></div>
+
+                    
+                    <h2 class="header bold font-bold">K-Edge Connected Components</h2>
+                    <input type="text" id="kInput2" placeholder="Input k..." class="border p-2"/>
+                    <button id="kComponentsButton" class = button>Find Edge-Components</button>
+                    <div id="kComponentsContainer" class="flex flex-col gap-1 mt-2"></div>
+                    
+                    <h2 class="header font-bold">Spanning Tree Congestion Approximation</h2>
+                    <button id="stcButton" class = button>Find Tree</button>
+                    <div id="stcContainer" class="flex flex-col gap-1 mt-2"></div>
+    
             </div>
 
         </div>

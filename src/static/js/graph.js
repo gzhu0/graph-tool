@@ -108,12 +108,47 @@ for (let nodeId of B) {
     cy.getElementById(nodeId).addClass('blueNode');
     console.log(cy.getElementById(nodeId))
 }
+}
 
+export function highlightAny(partitions) {
+    // Creates k colors for k partitions
+    cy.elements().forEach(el => {
+        el.classes()
+          .filter(c => c.startsWith('dynNode-'))
+          .forEach(c => el.removeClass(c));
+    });
+
+    const k = partitions.length;
+
+    partitions.forEach((partition, i) => {
+        const hue = Math.round((i / k) * 360);
+        const className = `dynNode-${i}`;
+
+        cy.style()
+          .selector(`.${className}`)
+          .style({
+              'background-color': `hsl(${hue}, 45%, 70%)`,
+              'border-width': '3px'
+          })
+          .update();
+
+        for (let nodeId of partition) {
+            cy.getElementById(String(nodeId)).addClass(className);
+        }
+    });
 }
 
 export function cleanGraph() {
-    // Removes classes from every node
+    // Removes coloring on all nodes
     cy.nodes().removeClass('redNode blueNode');
+
+    // Remove any dynamic classes matching the pattern
+    cy.nodes().forEach(node => {
+        const dynClasses = node.classes().filter(c => c.startsWith('dynNode-'));
+        if (dynClasses.length) {
+            node.removeClass(dynClasses.join(' '));
+        }
+    });
 }
 
 export function createGraph(edges) {
