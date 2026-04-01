@@ -12,6 +12,9 @@ class k_algorithm(BaseModel):
     data: list[list[int]] 
     k: int
 
+class edge_list(BaseModel):
+    data: list[list[int]] 
+
 @app.get("/")
 def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -31,10 +34,11 @@ def algorithm_kcomponents(request: k_algorithm):
     return src.graph_algorithms.k_edge_connected_components(request.data, request.k)
 
 @app.post("/algorithm-stc")
-def algorithm_kstc(request: k_algorithm):
+def algorithm_kstc(request: edge_list):
     '''
     returns 
     '''
+    return src.graph_algorithms.algorithm_stc(request.data)
     
 
 
