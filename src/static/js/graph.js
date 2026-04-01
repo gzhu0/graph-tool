@@ -62,6 +62,15 @@ export const cy = cytoscape({
                 'border-color': 'black'
             }
         },
+        {
+            selector: '.greenEdge',
+            style: {
+                'width': 4,
+                'line-color': 'green',
+                'target-arrow-shape': 'none',
+                'curve-style': 'bezier'
+            }
+        },
     ],
     layout: {
         name: 'grid',
@@ -138,9 +147,25 @@ export function highlightAny(partitions) {
     });
 }
 
+export function highlightEdges(edges) {
+    // Highlights a set of edges
+    for (let edge of edges) {
+        let edgeId = edge[0] + "," + edge[1]
+        console.log("highlighting", edgeId);
+        cy.getElementById(String(edgeId)).addClass('greenEdge')
+        
+        if (cy.getElementById(edgeId).length > 0) {
+            console.log("edge", edgeId, "exists");
+        } else {
+            console.log("womp womp");
+        }
+    }
+}
+
 export function cleanGraph() {
     // Removes coloring on all nodes
     cy.nodes().removeClass('redNode blueNode');
+    cy.edges().removeClass('greenEdge');
 
     // Remove any dynamic classes matching the pattern
     cy.nodes().forEach(node => {
@@ -161,7 +186,8 @@ export function createGraph(edges) {
         if (!nodes.has(v)) {
             cy.add({group: 'nodes', data: {id: v}});
         }
-        cy.add({group:'edges', data: {source: u, target: v}});
+        let edgeId = u.toString() + "," + v.toString();
+        cy.add({group:'edges', data: {id: String(edgeId), source: u, target: v}});
     }
 )
     const layout = cy.layout({ name: 'cose' });

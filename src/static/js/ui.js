@@ -162,6 +162,45 @@ function createComponentContainer(k_components) {
     });
 }
 
+function createStcContainer(edges, cng) {
+    // Creates a container that represents edges
+    
+    console.log("stc: ", cng);
+    stcContainer.innerHTML = "Congestion: " + cng;
+
+
+    if (edges.length == 0) {
+        const item = document.createElement('div');
+        item.innerText = "No Spanning Tree Found."
+        stcContainer.appendChild(item);
+    }
+    else 
+    {
+    stcContainer.innerHTML = "Congestion: " + cng;
+
+    const item = document.createElement('div');
+    item.className = 'cutItem';
+    let text = "";
+    edges.forEach((edge) => {
+        text += "(" + edge[0] + "," + edge[1] + ") "
+    })
+    item.innerText = text;
+
+    item.addEventListener('mouseenter', () => {
+        Graph.highlightEdges(edges);
+    });
+
+    item.addEventListener('mouseleave', () => {
+        Graph.cleanGraph();
+    });
+
+    stcContainer.appendChild(item);
+
+    }
+
+
+}
+
 // API CALLS
 
 //Find k cuts
@@ -218,7 +257,32 @@ kComponentsButton.addEventListener("click", async () => {
     }
 }); 
 
+stcButton.addEventListener("click", async() => {
+    const body = {
+        data: Graph.jsonToEdgeList()
+    }
+    try {
+        stcContainer.innerText = "Loading...";
+        const response = await fetch("/algorithm-stc", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
 
+        let stc_result = await response.json();
+        let stc_tree = stc_result[0];
+        let stc_cng = stc_result[1];
+        console.log("resultL", stc_result)
+
+        createStcContainer(stc_tree, stc_cng)
+
+    } catch (err) {
+        console.error("Error:", err);
+    }
+
+})
 
 // Graph Interaction
 cy.on('tap', function(event)
