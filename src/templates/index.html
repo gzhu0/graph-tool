@@ -5,60 +5,54 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Graph Tool</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
-        <link rel="stylesheet" href="{{ url_for('static', path='dist/styles.css') }}">
-        
+        <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✒️</text></svg>">
     </head>
-    
-    <body class="h-screen w-screen flex flex-col p-6">
-        <div class="flex justify-between items-center border-b-2 border-black pb-2 mb-4">
-            <div class="text-2xl font-bold">Graph Tool</div>
+
+    <body>
+        <div class="topbar">
+            <div class="topbar-title">Graph Tool</div>
             <a href="https://github.com/gzhu0/graph-tool" target="_blank">
-                <img src="https://cdn.simpleicons.org/github" class="w-8 h-8 hover:opacity-60" />
+                <img src="https://cdn.simpleicons.org/github" style="width:2rem;height:2rem;" />
             </a>
         </div>
-        <div class="grid grid-cols-[1fr_4fr_1fr] gap-4 p-4 h-full">
-            <!-- Note: Left Column - Graph Editing, Right Column: Algorithms list-->
 
+        <div class="main-grid">
             <!-- Left Column -->
-            <div class="flex flex-col gap-2">
-                <h2 class="header font-bold">Draw</h2>
-                <button id="nodeButton" class = "button">Vertex (v)</button>
-                <button id="edgeButton" class = "button">Edge (e)</button>
-                <button id="deleteButton" class = "button">Delete (d)</button>
-                <h2 class="header font-bold">Graph</h2>
-                <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]" class="border p-2 h-24"></textarea>
-                <button id="createGraphButton" class = "button">Create Graph</button>
-                <button id="debugButton" class = "button">Debug</button>
+            <div class="left-col">
+                <h2 class="header">Draw</h2>
+                <button id="nodeButton" class="button">Vertex (v)</button>
+                <button id="edgeButton" class="button">Edge (e)</button>
+                <button id="deleteButton" class="button">Delete (d)</button>
+                <h2 class="header">Graph</h2>
+                <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]"></textarea>
+                <button id="createGraphButton" class="button">Create Graph</button>
+                <button id="debugButton" class="button">Debug</button>
             </div>
 
             <!-- Middle Column -->
-            <div id="cy" class="border-2 rounded border-black w-full h-full"></div>
+            <div id="cy"></div>
 
             <!-- Right Column -->
-            <div class="flex flex-col gap-2">
-                <h2 class="header font-bold">Algorithms</h2>
+            <div class="right-col">
+                <h2 class="header">Algorithms</h2>
 
-                    <h2 class="header font-bold">K-Cuts</h2>
-                    <input type="text" id="kInput" placeholder="Input k..." class="border p-2"/>
-                    <button id="kCutsButton" class = button>Find Cuts</button>
-                    <div id="cutsContainer" class="flex flex-col gap-1 mt-2"></div>
+                <h2 class="subheader">K-Cuts</h2>
+                <input type="text" id="kInput" placeholder="Input k..." />
+                <button id="kCutsButton" class="button">Find Cuts</button>
+                <div id="cutsContainer"></div>
 
-                    
-                    <h2 class="header bold font-bold">K-Edge Connected Components</h2>
-                    <input type="text" id="kInput2" placeholder="Input k..." class="border p-2"/>
-                    <button id="kComponentsButton" class = button>Find Edge-Components</button>
-                    <div id="kComponentsContainer" class="flex flex-col gap-1 mt-2"></div>
-                    
-                    <h2 class="header font-bold">Spanning Tree Congestion Approximation</h2>
-                    <button id="stcButton" class = button>Find Tree</button>
-                    <div id="stcContainer" class="flex flex-col gap-1 mt-2"></div>
-    
+                <h2 class="subheader">K-Edge Connected Components</h2>
+                <input type="text" id="kInput2" placeholder="Input k..." />
+                <button id="kComponentsButton" class="button">Find Edge-Components</button>
+                <div id="kComponentsContainer"></div>
+
+                <h2 class="subheader">Spanning Tree Congestion Approximation</h2>
+                <button id="stcButton" class="button">Find Tree</button>
+                <div id="stcContainer"></div>
             </div>
-
         </div>
 
         <script type="module" src="{{ url_for('static', path='js/main.js') }}"></script>
     </body>
 </html>
-

@@ -152,7 +152,7 @@ def random_spanning_tree(G):
         tree_edge_ids.append(eid)
     return tree_edge_ids
 
-def sa(G, steps=100_000, temp=10.0, cooling=0.9995):
+def sa(G, steps=1000_000, temp=10.0, cooling=0.9995):
     tree_edges = random_spanning_tree(G)
     best_edges = tree_edges[:]
     best_cost = congestion(G, tree_edges)
