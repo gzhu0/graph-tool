@@ -78,6 +78,16 @@ export const cy = cytoscape({
     }
 });
 
+window.addEventListener('load', () => {
+    cy.resize();
+    cy.fit();
+});
+
+// Debug
+console.log('cy container:', document.getElementById('cy'));
+console.log('cy height:', document.getElementById('cy').offsetHeight);
+console.log('cy width:', document.getElementById('cy').offsetWidth);
+
 // Graph Utility Functions
 export function clearSelectedNode() {
     // Clears selected node and removes styling
