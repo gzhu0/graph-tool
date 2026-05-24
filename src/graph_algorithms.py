@@ -196,3 +196,39 @@ def sa(G, steps=1000_000, temp=10.0, cooling=0.9995):
         temp *= cooling
     
     return best_edges, best_cost
+
+#via igraph, brute force the STC of a given spanning tree given the original graph and the spanning tree
+def spanningTreeCongestion(graph, spanningTree) -> int:
+    #the spanning tree MUST be valid, little error checking is done to ensure it is valid
+    #graph is the undirected base igraph object of the graph in question
+    #st edge is a list of tuples (or whatever the parentheses are) representing the edges in the spanning tree
+    #corresponding vertices must be named the same on both graphs, 0 to n-1
+
+    maxCongestion = 1
+    STedges = spanningTree.get_edgelist()
+
+    #these are needed beacuse all_st_cuts does not work with an undirected graph, and was the easiest way for me to create a partition given the spanning tree (i don't need to personally figure out which edge is where)
+    directedSpanningTree = spanningTree.as_directed()
+
+    for edge in STedges:
+        treeCuts = directedSpanningTree.all_st_cuts(edge[0], edge[1])
+
+        if (len(treeCuts) != 1):
+            print("WEEWOO")
+            raise Exception("given cut of spanning tree does not have one edge")
+        
+        leftpart = treeCuts[0].partition[0]
+        rightpart = treeCuts[0].partition[1]
+        edgeCongestion = 0
+
+        #for every combination of left part-right part, check if there is an edge in the original graph, if so that adds 1 to the congestion
+        #the spanning tree edge will be counted as well with this method
+        for leftvertex in leftpart:
+            for rightvertex in rightpart:
+                if (graph[leftvertex, rightvertex]):
+                    edgeCongestion = edgeCongestion + 1
+        
+        if (edgeCongestion > maxCongestion):
+            maxCongestion = edgeCongestion
+
+    return maxCongestion
