@@ -10,8 +10,10 @@ graph_algorithms.k_cut(data,4)
 edges = [(0,1),(1,2),(2,3),(3,0)]
 edgeweights = [1,1,1,1]
 g = ig.Graph(n=4, edges=edges)
-gdirected = g.as_directed()
+g.es["weight"] = 1.0
+g[0,1] = 3
 
+print(g)
 
 fig, ax = plt.subplots()
 ig.plot(g, target=ax, 

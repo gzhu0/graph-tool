@@ -225,8 +225,8 @@ def spanningTreeCongestion(graph, spanningTree) -> int:
         #the spanning tree edge will be counted as well with this method
         for leftvertex in leftpart:
             for rightvertex in rightpart:
-                if (graph[leftvertex, rightvertex]):
-                    edgeCongestion = edgeCongestion + 1
+                #the matrix form of the graph that igraph gives has numbers represent the weights as well, allowing us to account for multigraphs
+                edgeCongestion += graph[leftvertex, rightvertex]
         
         if (edgeCongestion > maxCongestion):
             maxCongestion = edgeCongestion
