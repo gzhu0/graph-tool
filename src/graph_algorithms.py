@@ -9,6 +9,7 @@ import itertools
 import igraph as ig
 import random
 import math
+import numpy as np
 
 # K-Cut Algorithm ###
 
@@ -232,3 +233,62 @@ def spanningTreeCongestion(graph, spanningTree) -> int:
             maxCongestion = edgeCongestion
 
     return maxCongestion
+
+#gives a list of tuples of edges, each tuple is a spanning tree and containes edges represented by tuples
+def getAllSpanningTrees(graph) -> list:
+    'gives a list of tuples of edges, each tuple is a spanning tree and containes edges represented by tuples'
+    spanningtrees = []
+    adjmatrix = np.array(graph.get_adjacency())
+    currTree = ()
+    currVertices = (0,)
+    getSpanningTreeRecursive(adjmatrix, currTree, currVertices, spanningtrees)
+
+    return spanningtrees
+
+
+def getSpanningTreeRecursive(adjacency, currTreeEdges, currTreeVertices, spanningTreeList):
+    n = adjacency.shape[1]
+    if (len(currTreeEdges) == n-1):
+        currTreeEdges = tuple(sorted(currTreeEdges))
+        if currTreeEdges not in spanningTreeList:
+            spanningTreeList.append(currTreeEdges)
+        return
+    for vertex in currTreeVertices:
+        for i in range(n):
+            if i in currTreeVertices:
+                continue
+            if (adjacency[vertex][i]):
+                getSpanningTreeRecursive(adjacency, currTreeEdges + ((vertex, i),), currTreeVertices + (i,), spanningTreeList) 
+    return
+
+#sanity check, use kirchoff's theorem to figure out how many spanning trees there should be
+def getNumSpanningTrees(graph) -> int:
+    'use kirchoffs theorem to figure out how many spanning trees there should be'
+    adjmatrix = np.array(graph.get_adjacency())
+    adjmatrix = -1 * adjmatrix
+
+    for i in range(adjmatrix.shape[1]):
+        adjmatrix[i][i] = 0
+        for j in range(adjmatrix.shape[1]):
+            if adjmatrix[i][j] == -1:
+                adjmatrix[i][i]  += 1
+    adjmatrix = np.delete(adjmatrix, 0, axis=0)
+    adjmatrix = np.delete(adjmatrix, 0, axis=1)
+
+    return round(np.linalg.det(adjmatrix))
+
+
+def getMinimumSpanningTrees(graph) -> tuple:
+    'tuple is ([list of min span trees in edges], congestion)'
+    minSpanTrees = []
+    allSpanTrees = getAllSpanningTrees(graph)
+    if (len(allSpanTrees) != getNumSpanningTrees(graph)):
+        raise Exception("Number of spanning trees does not match how many should exist", len(allSpanTrees), "(found) vs " getNumSpanningTrees(graph), " (kirchoff)")
+    congestions = []
+    for spanningtreeedgeset in allSpanTrees:
+        congestions.append(spanningTreeCongestion(graph, ig.Graph(edges=spanningtreeedgeset)))
+    minCongestion = min(congestions)
+    for i in range(len(allSpanTrees)):
+        if (congestions[i] == minCongestion):
+            minSpanTrees.append(allSpanTrees[i])
+    return minSpanTrees, minCongestion
