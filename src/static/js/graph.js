@@ -116,7 +116,8 @@ export function jsonToEdgeList() {
         for (let edge of edges) {
             let s = parseInt(edge.data.source);
             let t = parseInt(edge.data.target);
-            output.push([s,t]);
+            let w = parseInt(edge.data.weight) || 1;
+            output.push([s,t,w]);
         }
 }
     return output
@@ -199,7 +200,7 @@ export function cleanGraph() {
 export function createGraph(edges) {
     cy.elements().remove();
     let nodes = new Set();
-    edges.forEach(([u,v]) => {
+    edges.forEach(([u,v,w=1]) => {
         if (!nodes.has(u)) {
             cy.add({group: 'nodes', data: {id: u}});
         }
@@ -207,7 +208,7 @@ export function createGraph(edges) {
             cy.add({group: 'nodes', data: {id: v}});
         }
         let edgeId = u.toString() + "," + v.toString();
-        cy.add({group:'edges', data: {id: String(edgeId), source: u, target: v}});
+        cy.add({group:'edges', data: {id: String(edgeId), source: u, target: v, weight: w}});
     }
 )
     const layout = cy.layout({ name: 'cose' });
