@@ -70,6 +70,16 @@ export const cy = cytoscape({
                 'target-arrow-shape': 'none',
                 'curve-style': 'bezier'
             }
+        }, 
+        {
+            selector: 'edge[weight > 1]',
+            style: {
+                'label': 'data(weight)',
+                'text-background-opacity': 1,
+                'text-background-color': '#fff',
+                'text-background-padding': '2px',
+                'font-size': '10px'
+            },
         },
     ],
     layout: {
@@ -106,7 +116,8 @@ export function jsonToEdgeList() {
         for (let edge of edges) {
             let s = parseInt(edge.data.source);
             let t = parseInt(edge.data.target);
-            output.push([s,t]);
+            let w = parseInt(edge.data.weight) || 1;
+            output.push([s,t,w]);
         }
 }
     return output
@@ -159,8 +170,19 @@ export function highlightAny(partitions) {
 
 export function highlightEdges(edges) {
     // Highlights a set of edges
+    console.log("fafdasfa", edges)
+    cy.edges().forEach(edge => {
+        console.log(edge.data("id"));
+    });
     for (let edge of edges) {
-        let edgeId = edge[0] + "," + edge[1]
+        let u = edge[0];
+        let v = edge[1];
+        let a = Math.min(u, v);
+        let b = Math.max(u, v);
+
+        let edgeId = `${a},${b}`;
+
+
         console.log("highlighting", edgeId);
         cy.getElementById(String(edgeId)).addClass('greenEdge')
         
@@ -189,15 +211,17 @@ export function cleanGraph() {
 export function createGraph(edges) {
     cy.elements().remove();
     let nodes = new Set();
-    edges.forEach(([u,v]) => {
+    edges.forEach(([u,v,w=1]) => {
         if (!nodes.has(u)) {
             cy.add({group: 'nodes', data: {id: u}});
+            nodes.add(u);
         }
         if (!nodes.has(v)) {
             cy.add({group: 'nodes', data: {id: v}});
+            nodes.add(v);
         }
         let edgeId = u.toString() + "," + v.toString();
-        cy.add({group:'edges', data: {id: String(edgeId), source: u, target: v}});
+        cy.add({group:'edges', data: {id: String(edgeId), source: u, target: v, weight: w}});
     }
 )
     const layout = cy.layout({ name: 'cose' });
@@ -239,7 +263,7 @@ export function drawNode(event) {
     }
 
 
-export function drawEdge(event) {
+export function drawEdge(event, weight) {
     // Connect selected node with tapped node. If no tapped node, then select -> tapped
     if (event.target != null && event.target != cy && event.target.isNode()) {
     if (selectedNode == null) {
@@ -262,7 +286,7 @@ export function drawEdge(event) {
             console.log("creating edge", edgeId);
             cy.add({
                 group: 'edges',
-                data: {id : edgeId, source: source, target: target}
+                data: {id : edgeId, source: source, target: target, weight: weight}
             });
         }
         clearSelectedNode();

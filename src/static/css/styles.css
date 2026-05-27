@@ -119,3 +119,21 @@ input[type="text"] {
     font-size: 1rem;
     color: #181818;
 }
+
+.edge-weight-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.edge-weight-label {
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.edge-weight-input {
+    width: 60px;
+    padding: 2px 4px;
+    font-size: 0.85rem;
+}

@@ -24,10 +24,16 @@
                 <button id="nodeButton" class="button">Vertex (v)</button>
                 <button id="edgeButton" class="button">Edge (e)</button>
                 <button id="deleteButton" class="button">Delete (d)</button>
+                <div class="edge-weight-row">
+                    <span class="edge-weight-label">Edge Weight</span>
+                    <input type="number" id="edgeWeightInput" class="edge-weight-input" value="1" min="0" step="0.1">
+                </div>
+                
                 <h2 class="header">Graph</h2>
                 <textarea id="edgeBox" placeholder="Ex: [[1,2],[3,4]...]"></textarea>
                 <button id="createGraphButton" class="button">Create Graph</button>
                 <button id="debugButton" class="button">Debug</button>
+                
             </div>
 
             <!-- Middle Column -->
@@ -46,6 +52,13 @@
                 <input type="text" id="kInput2" placeholder="Input k..." />
                 <button id="kComponentsButton" class="button">Find Edge-Components</button>
                 <div id="kComponentsContainer"></div>
+
+                <h2 class="subheader">Cactus Graph</h2>
+                <button id="cactusButton" class="button">Find Tree</button>
+
+                <h2 class="subheader">Spanning Tree Congestion</h2>
+                <button id="allStcButton" class="button">Find Tree</button>
+                <div id="allStcContainer"></div>
 
                 <h2 class="subheader">Spanning Tree Congestion Approximation</h2>
                 <button id="stcButton" class="button">Find Tree</button>
