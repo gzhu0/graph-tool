@@ -15,6 +15,7 @@ const deleteButton = document.getElementById("deleteButton");
 const debugButton = document.getElementById("debugButton");
 const edgeBox = document.getElementById("edgeBox");
 const createGraphButton = document.getElementById("createGraphButton");
+const edgeWeightInput = document.getElementById("edgeWeightInput");
 
 const kInput = document.getElementById("kInput");
 const kCutsButton = document.getElementById("kCutsButton");
@@ -292,7 +293,8 @@ cy.on('tap', function(event)
     }
 
     else if (drawMode == 'edge'){
-        Graph.drawEdge(event);
+        const weight = parseInt(document.getElementById('edgeWeightInput').value) || 1;
+        Graph.drawEdge(event, weight);
     }
 
     else if (drawMode == "delete") {

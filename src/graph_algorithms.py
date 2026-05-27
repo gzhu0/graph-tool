@@ -11,7 +11,7 @@ import random
 import math
 import numpy as np
 
-# K-Cut Algorithm ###
+# K-Cut Algorithm 
 
 def k_cut(data: list[list], k: int):
     '''
@@ -24,7 +24,6 @@ def k_cut(data: list[list], k: int):
     n = len(vertices)
     cut_count = 0
     cuts_return = []
-
 
     for cut in itertools.combinations(data, k):
         cut_set = set(tuple(x) for x in cut)
@@ -283,7 +282,7 @@ def getMinimumSpanningTrees(graph) -> tuple:
     minSpanTrees = []
     allSpanTrees = getAllSpanningTrees(graph)
     if (len(allSpanTrees) != getNumSpanningTrees(graph)):
-        raise Exception("Number of spanning trees does not match how many should exist", len(allSpanTrees), "(found) vs " getNumSpanningTrees(graph), " (kirchoff)")
+        raise Exception("Number of spanning trees does not match how many should exist", len(allSpanTrees), "(found) vs ", getNumSpanningTrees(graph), " (kirchoff)")
     congestions = []
     for spanningtreeedgeset in allSpanTrees:
         congestions.append(spanningTreeCongestion(graph, ig.Graph(edges=spanningtreeedgeset)))

@@ -70,6 +70,16 @@ export const cy = cytoscape({
                 'target-arrow-shape': 'none',
                 'curve-style': 'bezier'
             }
+        }, 
+        {
+            selector: 'edge[weight > 1]',
+            style: {
+                'label': 'data(weight)',
+                'text-background-opacity': 1,
+                'text-background-color': '#fff',
+                'text-background-padding': '2px',
+                'font-size': '10px'
+            },
         },
     ],
     layout: {
@@ -239,7 +249,7 @@ export function drawNode(event) {
     }
 
 
-export function drawEdge(event) {
+export function drawEdge(event, weight) {
     // Connect selected node with tapped node. If no tapped node, then select -> tapped
     if (event.target != null && event.target != cy && event.target.isNode()) {
     if (selectedNode == null) {
@@ -262,7 +272,7 @@ export function drawEdge(event) {
             console.log("creating edge", edgeId);
             cy.add({
                 group: 'edges',
-                data: {id : edgeId, source: source, target: target}
+                data: {id : edgeId, source: source, target: target, weight: weight}
             });
         }
         clearSelectedNode();
