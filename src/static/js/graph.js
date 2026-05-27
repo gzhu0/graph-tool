@@ -170,8 +170,19 @@ export function highlightAny(partitions) {
 
 export function highlightEdges(edges) {
     // Highlights a set of edges
+    console.log("fafdasfa", edges)
+    cy.edges().forEach(edge => {
+        console.log(edge.data("id"));
+    });
     for (let edge of edges) {
-        let edgeId = edge[0] + "," + edge[1]
+        let u = edge[0];
+        let v = edge[1];
+        let a = Math.min(u, v);
+        let b = Math.max(u, v);
+
+        let edgeId = `${a},${b}`;
+
+
         console.log("highlighting", edgeId);
         cy.getElementById(String(edgeId)).addClass('greenEdge')
         
@@ -203,9 +214,11 @@ export function createGraph(edges) {
     edges.forEach(([u,v,w=1]) => {
         if (!nodes.has(u)) {
             cy.add({group: 'nodes', data: {id: u}});
+            nodes.add(u);
         }
         if (!nodes.has(v)) {
             cy.add({group: 'nodes', data: {id: v}});
+            nodes.add(v);
         }
         let edgeId = u.toString() + "," + v.toString();
         cy.add({group:'edges', data: {id: String(edgeId), source: u, target: v, weight: w}});

@@ -328,6 +328,13 @@ def getNumSpanningTrees(graph) -> int:
 
 def getMinimumSpanningTrees(graph) -> tuple:
     'tuple is ([list of min span trees in edges], congestion)'
+    # Init the graph
+    edges = [(u-1, v-1) for u, v, w in graph]
+    weights = [w for u, v, w in graph]
+
+    graph = ig.Graph(edges=edges, directed=False)
+    graph.es["weight"] = weights
+
     minSpanTrees = []
     allSpanTrees = getAllSpanningTrees(graph)
     if (len(allSpanTrees) != getNumSpanningTrees(graph)):

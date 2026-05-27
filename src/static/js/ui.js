@@ -20,6 +20,11 @@ const edgeWeightInput = document.getElementById("edgeWeightInput");
 const kInput = document.getElementById("kInput");
 const kCutsButton = document.getElementById("kCutsButton");
 const cutsContainer = document.getElementById("cutsContainer");
+// cactus
+const cactusButton = document.getElementById("cactusButton");
+// All stc
+const allStcButton = document.getElementById("allStcButton");
+const allStcContainer = document.getElementById("allStcContainer");
 
 const kInput2 = document.getElementById("kInput2");
 const kComponentsButton = document.getElementById("kComponentsButton");
@@ -284,6 +289,94 @@ stcButton.addEventListener("click", async() => {
     }
 
 })
+
+// Cacuts Graph
+
+cactusButton.addEventListener("click", async () => {
+    let k = kInput.value;
+    const body = {
+        data: Graph.jsonToEdgeList(),
+        k: parseInt(k) 
+    }
+    console.log("POST: sending ", body);
+    try {
+        const response = await fetch("/algorithm-cactus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        let cactus_edges = await response.json();
+        console.log("Response:", cactus_edges);
+        // Create cut container
+        Graph.createGraph(cactus_edges);
+
+    } catch (err) {
+        console.error("Error:", err);
+    }
+});
+
+// get all spanning trees
+allStcButton.addEventListener("click", async () => {
+    const body = {
+        data: Graph.jsonToEdgeList()
+    }
+    try {
+        allStcContainer.innerText = "Loading...";
+        const response = await fetch("/algorithm-allstc", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        let allstc_result = await response.json();
+        let allstc_trees = allstc_result[0]; // list of trees
+        let allstc_cng = allstc_result[1];
+        console.log("result:", allstc_result);
+
+        createAllStcContainer(allstc_trees, allstc_cng);
+
+    } catch (err) {
+        console.error("Error:", err);
+    }
+});
+
+// all stc container
+function createAllStcContainer(trees, cng) {
+    allStcContainer.innerHTML = "Congestion: " + cng;
+
+    if (!trees || trees.length === 0) {
+        const item = document.createElement('div');
+        item.innerText = "No Spanning Trees Found.";
+        allStcContainer.appendChild(item);
+        return;
+    }
+
+    trees.forEach((edges, index) => {
+        const item = document.createElement('div');
+        item.className = 'cutItem';
+
+        let text = `Tree ${index + 1}: `;
+        edges.forEach((edge) => {
+            text += "(" + edge[0] + "," + edge[1] + ") ";
+        });
+        item.innerText = text;
+
+        item.addEventListener('mouseenter', () => {
+            Graph.highlightEdges(edges);
+        });
+
+        item.addEventListener('mouseleave', () => {
+            Graph.cleanGraph();
+        });
+
+        allStcContainer.appendChild(item);
+    });
+}
 
 // Graph Interaction
 cy.on('tap', function(event)

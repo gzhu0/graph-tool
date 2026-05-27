@@ -3,7 +3,9 @@ Script to convert a 3-edge connected graph into a cactus graph
 '''
 
 import igraph
-import graph_algorithms as g
+import src.graph_algorithms as g
+
+currn = 0
 
 class graph:
     def __init__(self, verticies, edges):
@@ -178,13 +180,16 @@ def cactus(v, cuts):
     return graph(v, [(ordered[i], ordered[(i + 1) % len(ordered)]) for i in range(len(ordered))])   
     
 def create_cactus(edges):
+    global currn
     '''
     Creates a cactus given edges
     Oh my balls this better work
     '''
     vertices = setup(edges)
-    curnn = len(vertices) # Global counter
+    currn = len(vertices) # Global counter
     basic_f_cuts = get_f_cuts(vertices, edges)
     cactus_graph = cactus(vertices, basic_f_cuts)
-    return cactus_graph.edges
+    result = [list(edge) for edge in cactus_graph.edges]
+    print("Generated", result)
+    return result
 

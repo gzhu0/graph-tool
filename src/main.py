@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import src.graph_algorithms
+import src.cactus
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
@@ -39,6 +40,22 @@ def algorithm_kstc(request: edge_list):
     returns 
     '''
     return src.graph_algorithms.algorithm_stc(request.data)
+
+@app.post("/algorithm-cactus")
+def algorithm_cactus(request: edge_list):
+    '''
+    returns 
+    '''
+    return src.cactus.create_cactus(request.data)
+
+
+@app.post("/algorithm-allstc")
+def algorithm_allstc(request: edge_list):
+    '''
+    returns 
+    '''
+    return src.graph_algorithms.getMinimumSpanningTrees(request.data)
+    
     
 
 
