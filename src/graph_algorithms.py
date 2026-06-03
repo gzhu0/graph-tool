@@ -346,4 +346,5 @@ def getMinimumSpanningTrees(graph) -> tuple:
     for i in range(len(allSpanTrees)):
         if (congestions[i] == minCongestion):
             minSpanTrees.append(allSpanTrees[i])
+
     return minSpanTrees, minCongestion

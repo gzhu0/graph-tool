@@ -175,8 +175,8 @@ export function highlightEdges(edges) {
         console.log(edge.data("id"));
     });
     for (let edge of edges) {
-        let u = edge[0];
-        let v = edge[1];
+        let u = edge[0] + 1; 
+        let v = edge[1] + 1;
         let a = Math.min(u, v);
         let b = Math.max(u, v);
 
