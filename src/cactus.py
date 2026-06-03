@@ -88,17 +88,17 @@ def get_f_cuts(vertices, edges):
     F_cuts.extend(corner_cuts)
     F_cuts = [list(map(set, cut)) for cut in {frozenset(map(frozenset, cut)) for cut in F_cuts}]
 
-    # Get basic F-cuts
-    # Basic_F_cuts = []
-    # for cut1 in F_cuts:
-    #     flag = True
-    #     for cut2 in F_cuts:
-    #         if cut1 != cut2 and isCrossing(cut1, cut2)[0]:
-    #             flag = False
-    #     if flag:
-    #         Basic_F_cuts.append(cut1)
+    # Get basic Fcuts
+    Basic_F_cuts = []
+    for cut1 in F_cuts:
+        flag = True
+        for cut2 in F_cuts:
+            if cut1 != cut2 and isCrossing(cut1, cut2)[0]:
+                flag = False
+        if flag:
+            Basic_F_cuts.append(cut1)
 
-    return F_cuts
+    return F_cuts, Basic_F_cuts
 
 def edit_cuts(v, cuts, dummy, dummyset):
     '''
@@ -116,69 +116,86 @@ def edit_cuts(v, cuts, dummy, dummyset):
             new_cuts.append((s1,s2))
     return new_cuts
 
-def cactus(v, cuts):
+def cactus(verticies, Fcuts, bFcuts, e):
     '''
     Recursive cactus function that returns a graph struct
     Takes in verticies, basic f-cuts
     '''
+    v = verticies
     global currn
     n = len(v)
-# Base Case: Either a vertex, cycle, or cube
-    # Vertex / Edge
+    # Base Case: Vertex 
     if len(v) == 1:
         return graph(verticies = v, edges = [])
-    if len(v) == 2:
-        vl = list(v)
-        v1, v2 = vl[0], vl[1] 
-        return graph(verticies = {v1,v2}, edges = [(v1,v2)])
 
-    # Find a nontrivial basic cut
-    for cut in cuts:
-        # Check if the cut is basic (not crossing)
-        if any(isCrossing(cut, other)[0] for other in cuts if other != cut):
-            continue
-
+    # Check if there exists a nontrivial basic cut. If there is, then partition, create dummy nodes, and recurse
+    for cut in bFcuts:
         shore1, shore2 = cut
-        p1 = shore1 & v# p - partitions
+        p1 = shore1 & v # p - partitions
         p2 = shore2 & v
-        if len(p1) >= 2 and len(p2) >= 2: # The cut is partitioning the subgraph, also checks triviality
-            # Recursive Case
+
+        print("CUT", shore1, shore2)
+        print("PARTITIONS", p1,p2)
+        if len(p1) >= 2 and len(p2) >= 2: # The cut is partitioning the subgraph, so we recurse
 
             # Add dummy nodes
             a = currn + 1
             b = currn + 2
             currn += 2
-
-            v1 = p1 | {a}
+            # Partition verticies
+            v1 = p1 | {a} 
             v2 = p2 | {b}
 
-            c1 = edit_cuts(v1,cuts,a,p2)
-            c2 = edit_cuts(v2,cuts,b,p1)
+            new_Fcuts1 = edit_cuts(v1,Fcuts,a,p2)
+            new_Fcuts2 = edit_cuts(v2,Fcuts,b,p1)
 
-            cactus1 = cactus(v1, c1)
-            cactus2 = cactus(v2,c2)
+            new_bFcuts1 = edit_cuts(v1,bFcuts,a,p2)
+            new_bFcuts2 = edit_cuts(v1,bFcuts,b,p1)
+
+            cactus1 = cactus(v1, new_Fcuts1, new_bFcuts1,e)
+            cactus2 = cactus(v2,new_Fcuts2, new_bFcuts2,e)
 
             verticies = cactus1.verticies | cactus2.verticies #union
             edges = cactus1.edges + cactus2.edges + [(a,b)]
 
             return graph(verticies = verticies, edges = edges)
-    # Slop for now ggs
-    # Create a cube or cycle graph
-
-    if len(v) == 8: # Cube Reconstruction
-            active = [c for c in cuts if 0 < len(c[0] & v) < 8][:3]
-            coords = {u: "".join("1" if u in s1 else "0" for s1, s2 in active) for u in v}
-            edges = [(u, w) for i, u in enumerate(list(v)) for w in list(v)[i+1:] if sum(b1 != b2 for b1, b2 in zip(coords[u], coords[w])) == 1]
-            return graph(v, edges)
-    # Otherwise, form a cycle 
-    ordered, remaining = [list(v)[0]], set(v) - {list(v)[0]}
-    while remaining:
-        # Find the next neighbor by choosing the node with the minimum cut separation
-        nxt = min(remaining, key=lambda cand: sum((ordered[-1] in s1 and cand in s2) or (ordered[-1] in s2 and cand in s1) for s1, s2 in cuts))
-        ordered.append(nxt)
-        remaining.remove(nxt) 
-    return graph(v, [(ordered[i], ordered[(i + 1) % len(ordered)]) for i in range(len(ordered))])   
+    # All 3-cuts are trivial, so we do checks:
     
+    # Check if the graph is cubic
+    degrees = {_v : 0 for _v in v}
+    print(degrees)
+    for u,v,w in e:
+        print(u,v)
+        degrees[u] += 1
+        degrees[v] += 1
+    if all(d == 3 for d in degrees.values()):
+        print("graph is cubic!")
+        return graph(verticies = verticies, edges = edges)
+
+    # Else there is a cycle
+    # Since every cactus node is empty or single it should be safe to treat everythig as a single vertex? and we use F cuts i thnk
+
+    new_edges = []
+    corners = None
+    flag2 = False
+    # 1. Find Crossing cuts
+    for i in range(len(Fcuts)):
+        for j in range(i,len(Fcuts)):
+            flag, corners = isCrossing(Fcuts[i],Fcuts[j])
+            # Corners from isCrossing should be in a cycle order
+            if flag:
+                flag2 = True 
+                break 
+        if flag2: break
+    if not flag:
+        raise ValueError("Crossing cuts not found")
+
+    # 2. Get node ordering for the cycle
+    for i in range(len(corners)):
+        new_edges.append((corners[i], corners[(i+1)%len(corners)]))
+
+    return graph(verticies=verticies, edges=new_edges)
+ 
 def create_cactus(edges):
     global currn
     '''
@@ -187,9 +204,11 @@ def create_cactus(edges):
     '''
     vertices = setup(edges)
     currn = len(vertices) # Global counter
-    basic_f_cuts = get_f_cuts(vertices, edges)
-    cactus_graph = cactus(vertices, basic_f_cuts)
+    F_cuts, basic_F_cuts = get_f_cuts(vertices, edges)
+    cactus_graph = cactus(vertices, F_cuts, basic_F_cuts, edges)
     result = [list(edge) for edge in cactus_graph.edges]
     print("Generated", result)
+    result = [(list(s1)[0], list(s2)[0]) for s1, s2 in result]
+
     return result
 
