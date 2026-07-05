@@ -284,7 +284,7 @@ def spanningTreeCongestion(graph, spanningTree) -> int:
 
 #gives a list of tuples of edges, each tuple is a spanning tree and containes edges represented by tuples
 def getAllSpanningTrees(graph) -> list:
-    'gives a list of tuples of edges, each tuple is a spanning tree and containes edges represented by tuples'
+    'gives a list of tuples of edges, each tuple is a spanning tree and containes edges represented by tuples, so each spanning tree is a tuple of tuples'
     spanningtrees = []
     adjmatrix = np.array(graph.get_adjacency())
     currTree = ()
@@ -326,7 +326,7 @@ def getNumSpanningTrees(graph) -> int:
     return round(np.linalg.det(adjmatrix))
 
 
-def getMinimumSpanningTrees(graph) -> tuple:
+def getMinimumCongestionSpanningTrees(graph) -> tuple:
     'tuple is ([list of min span trees in edges], congestion)'
     # Init the graph
     edges = [(u-1, v-1) for u, v, w in graph]
@@ -338,7 +338,7 @@ def getMinimumSpanningTrees(graph) -> tuple:
     minSpanTrees = []
     allSpanTrees = getAllSpanningTrees(graph)
     if (len(allSpanTrees) != getNumSpanningTrees(graph)):
-        raise Exception("Number of spanning trees does not match how many should exist", len(allSpanTrees), "(found) vs ", getNumSpanningTrees(graph), " (kirchoff)")
+        raise Exception("Number of spanning trees does not match how many should exist", len(allSpanTrees), " (found) vs ", getNumSpanningTrees(graph), " (kirchoff)")
     congestions = []
     for spanningtreeedgeset in allSpanTrees:
         congestions.append(spanningTreeCongestion(graph, ig.Graph(edges=spanningtreeedgeset)))
@@ -348,3 +348,88 @@ def getMinimumSpanningTrees(graph) -> tuple:
             minSpanTrees.append(allSpanTrees[i])
 
     return minSpanTrees, minCongestion
+
+
+# return -1 means that no graph matching the target congestion could be found
+# return -2 means that no spanning tree graph was found that matches the include/exclude
+
+def getMinSTCIncludeExlcude(graph, includeEdges, excludeEdges) -> tuple[list[list[tuple[int, int]]], int]:
+    'included edges sohuld be a list of some kind of iterable. same with exclude edges. returns an empty list  and -1 congestion if none found'
+    # reinit the graph
+    edges = [(u-1, v-1) for u, v, w in graph]
+    weights = [w for u, v, w in graph]
+
+    graph = ig.Graph(edges=edges, directed=False)
+    graph.es["weight"] = weights
+    
+    
+    minSpanTrees = []
+    allSpanTrees = getAllSpanningTrees(graph)
+    if (len(allSpanTrees) != getNumSpanningTrees(graph)):
+        raise Exception("Number of spanning trees does not match how many should exist")
+    viableSpanTrees = []
+
+    for spanningtree in allSpanTrees:
+        #this is messy but not the part thats slow so its ok
+        viabletree = True
+        for edge in includeEdges:
+            if (edge[0], edge[1]) not in spanningtree and (edge[1], edge[0]) not in spanningtree:
+                viabletree = False
+        for edge in excludeEdges:
+            if (edge[0], edge[1]) in spanningtree or (edge[1], edge[0]) in spanningtree:
+                viabletree = False
+        if viabletree:
+            viableSpanTrees.append(spanningtree)
+    if not viableSpanTrees:
+        #this shouldnt happen unless the include/exclude itself is impossible (excludes all edges connecting a vertex, for example). returns -2 so you know something went wrong-er
+        return [], -2
+    congestions = []
+    for spanningtreeedgeset in viableSpanTrees:
+        congestions.append(spanningTreeCongestion(graph, ig.Graph(edges=spanningtreeedgeset)))
+    minCongestion = min(congestions)
+    for i in range(len(viableSpanTrees)):
+        if (congestions[i] == minCongestion):
+            minSpanTrees.append(viableSpanTrees[i])
+    return minSpanTrees, minCongestion
+
+def getSTCIncludeExlcude(graph, includeEdges, excludeEdges, targetCongestion) -> tuple[list[tuple[int, int]], int]:
+    'returns a spanning tree with **less than or equal** congestion, as well as the congestion, that satisfies the include/exclude. can send in empty sets if you only want to test for possible congestion. returns the best tree it finds if the congestion is impossible'
+    
+    # reinit the graph
+    edges = [(u-1, v-1) for u, v, w in graph]
+    weights = [w for u, v, w in graph]
+
+    graph = ig.Graph(edges=edges, directed=False)
+    graph.es["weight"] = weights
+
+
+    allSpanTrees = getAllSpanningTrees(graph)
+    if (len(allSpanTrees) != getNumSpanningTrees(graph)):
+        raise Exception("Number of spanning trees does not match how many should exist")
+    viableSpanTrees = []
+
+    for spanningtree in allSpanTrees:
+        #this is messy but not the part thats slow so its ok
+        viabletree = True
+        for edge in includeEdges:
+            if (edge[0], edge[1]) not in spanningtree and (edge[1], edge[0]) not in spanningtree:
+                viabletree = False
+        for edge in excludeEdges:
+            if (edge[0], edge[1]) in spanningtree or (edge[1], edge[0]) in spanningtree:
+                viabletree = False
+        if viabletree:
+            viableSpanTrees.append(spanningtree)
+    if not viableSpanTrees:
+        #this shouldnt happen unless the include/exclude itself is impossible (excludes all edges connecting a vertex, for example). returns -2 so you know something went wrong-er
+        return [], -2
+    
+    currBest = []
+    minCongestion = 9999
+    for spanningtreeedgeset in viableSpanTrees:
+        cong = spanningTreeCongestion(graph, ig.Graph(edges=spanningtreeedgeset))
+        if cong <= targetCongestion:
+            return spanningtreeedgeset, cong
+        if cong < minCongestion:
+            minCongestion = cong
+            currBest = spanningtreeedgeset
+    return currBest, minCongestion
