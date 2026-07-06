@@ -7,6 +7,7 @@ import * as Graph from './graph.js';
 
 // Global
 let drawMode = "node";
+let edgeSelectMode = "none";
 
 // Button Elements
 const nodeButton = document.getElementById("nodeButton");
@@ -20,11 +21,22 @@ const edgeWeightInput = document.getElementById("edgeWeightInput");
 const kInput = document.getElementById("kInput");
 const kCutsButton = document.getElementById("kCutsButton");
 const cutsContainer = document.getElementById("cutsContainer");
+
 // cactus
 const cactusButton = document.getElementById("cactusButton");
+
 // All stc
 const allStcButton = document.getElementById("allStcButton");
 const allStcContainer = document.getElementById("allStcContainer");
+
+// stc include exclude
+const includeEdgesToggle = document.getElementById('includeEdgesToggle');
+const includeEdgesInput = document.getElementById('includeEdgesInput');
+
+const excludeEdgesToggle = document.getElementById('excludeEdgesToggle');
+const excludeEdgesInput = document.getElementById('excludeEdgesInput');
+
+// k components
 
 const kInput2 = document.getElementById("kInput2");
 const kComponentsButton = document.getElementById("kComponentsButton");
@@ -84,6 +96,63 @@ createGraphButton.addEventListener("click", function() {
     }
     
 });
+
+// Include Exclude Buttons
+function setEdgeSelectMode(mode) {
+  edgeSelectMode = (edgeSelectMode === mode) ? 'none' : mode;
+
+  drawMode = 'none';
+
+  includeEdgesToggle.classList.toggle('active', edgeSelectMode === 'include');
+  excludeEdgesToggle.classList.toggle('active', edgeSelectMode === 'exclude');
+}
+
+includeEdgesToggle.addEventListener('click', () => setEdgeSelectMode('include'));
+excludeEdgesToggle.addEventListener('click', () => setEdgeSelectMode('exclude'));
+
+// include exclude containers
+let includeEdgesList = [];
+let excludeEdgesList = [];
+
+function updateEdgeInputs() {
+  includeEdgesInput.value = JSON.stringify(includeEdgesList);
+  excludeEdgesInput.value = JSON.stringify(excludeEdgesList);
+}
+
+cy.on('tap', 'edge', (evt) => {
+  if (edgeSelectMode === 'none') return;
+
+  const edge = evt.target;
+  const pair = [parseInt(edge.source().id()), parseInt(edge.target().id())];
+
+  const targetList = edgeSelectMode === 'include' ? includeEdgesList : excludeEdgesList;
+
+  const alreadyExists = targetList.some(
+    ([a, b]) => (a === pair[0] && b === pair[1]) || (a === pair[1] && b === pair[0])
+  );
+
+  if (!alreadyExists) {
+    targetList.push(pair);
+    updateEdgeInputs();
+  }
+});
+
+includeEdgesInput.addEventListener('change', () => {
+  try {
+    includeEdgesList = JSON.parse(includeEdgesInput.value);
+  } catch {
+    includeEdgesInput.value = JSON.stringify(includeEdgesList);
+  }
+});
+
+excludeEdgesInput.addEventListener('change', () => {
+  try {
+    excludeEdgesList = JSON.parse(excludeEdgesInput.value);
+  } catch {
+    excludeEdgesInput.value = JSON.stringify(excludeEdgesList);
+  }
+});
+
 
 // UI Utility Functions
 export function updateEdgeOutput() {
@@ -321,7 +390,9 @@ cactusButton.addEventListener("click", async () => {
 // get all spanning trees
 allStcButton.addEventListener("click", async () => {
     const body = {
-        data: Graph.jsonToEdgeList()
+        data: Graph.jsonToEdgeList(),
+        includeEdges: includeEdgesList,
+        excludeEdges: excludeEdgesList
     }
     try {
         allStcContainer.innerText = "Loading...";
@@ -334,7 +405,7 @@ allStcButton.addEventListener("click", async () => {
         });
 
         let allstc_result = await response.json();
-        let allstc_trees = allstc_result[0]; // list of trees
+        let allstc_trees = allstc_result[0];
         let allstc_cng = allstc_result[1];
         console.log("result:", allstc_result);
 

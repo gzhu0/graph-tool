@@ -16,6 +16,11 @@ class k_algorithm(BaseModel):
 class edge_list(BaseModel):
     data: list[list[int]] 
 
+class include_exclude_list(BaseModel):
+    data: list
+    includeEdges: list[tuple[int, int]] = []
+    excludeEdges: list[tuple[int, int]] = []
+
 @app.get("/")
 def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -50,11 +55,17 @@ def algorithm_cactus(request: edge_list):
 
 
 @app.post("/algorithm-allstc")
-def algorithm_allstc(request: edge_list):
+def algorithm_allstc(request: include_exclude_list):
     '''
-    returns 
+    returns list of all spanning trees of min congestion with exclude and include, or
+    -1: no graph matching the target congestion found
+    -2: no spanning tree matches the include/exclude constraints
     '''
-    return src.graph_algorithms.getMinimumSpanningTrees(request.data)
+    return src.graph_algorithms.getMinSTCIncludeExlcude(
+        request.data,
+        request.includeEdges,
+        request.excludeEdges
+    )
     
     
 

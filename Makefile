@@ -3,3 +3,6 @@ run:
 
 dev:
 	uvicorn app.main:app --reload
+
+venv:
+	.venv/scripts/activate

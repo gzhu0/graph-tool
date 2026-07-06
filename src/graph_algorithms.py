@@ -246,6 +246,8 @@ def sa(G, steps=1000_000, temp=10.0, cooling=0.9995):
     
     return best_edges, best_cost
 
+# CURRENT STC
+
 #via igraph, brute force the STC of a given spanning tree given the original graph and the spanning tree
 def spanningTreeCongestion(graph, spanningTree) -> int:
     #the spanning tree MUST be valid, little error checking is done to ensure it is valid
@@ -347,6 +349,11 @@ def getMinimumCongestionSpanningTrees(graph) -> tuple:
         if (congestions[i] == minCongestion):
             minSpanTrees.append(allSpanTrees[i])
 
+    print(f'''
+Congestion: {minCongestion}
+Edges: {minSpanTrees}
+            ''')
+
     return minSpanTrees, minCongestion
 
 
@@ -355,9 +362,15 @@ def getMinimumCongestionSpanningTrees(graph) -> tuple:
 
 def getMinSTCIncludeExlcude(graph, includeEdges, excludeEdges) -> tuple[list[list[tuple[int, int]]], int]:
     'included edges sohuld be a list of some kind of iterable. same with exclude edges. returns an empty list  and -1 congestion if none found'
-    # reinit the graph
+
+    # reinit the graph, offset since cytoscape is off
     edges = [(u-1, v-1) for u, v, w in graph]
+    includeEdges = [(u-1, v-1) for u, v in includeEdges]
+    excludeEdges = [(u-1, v-1) for u, v in excludeEdges]
     weights = [w for u, v, w in graph]
+
+    print(f"Include: {includeEdges}")
+    print(f"Exclude: {excludeEdges}")
 
     graph = ig.Graph(edges=edges, directed=False)
     graph.es["weight"] = weights
@@ -390,6 +403,8 @@ def getMinSTCIncludeExlcude(graph, includeEdges, excludeEdges) -> tuple[list[lis
     for i in range(len(viableSpanTrees)):
         if (congestions[i] == minCongestion):
             minSpanTrees.append(viableSpanTrees[i])
+
+    print(f"Trees: {minSpanTrees}")
     return minSpanTrees, minCongestion
 
 def getSTCIncludeExlcude(graph, includeEdges, excludeEdges, targetCongestion) -> tuple[list[tuple[int, int]], int]:

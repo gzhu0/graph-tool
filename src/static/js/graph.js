@@ -169,7 +169,7 @@ export function highlightAny(partitions) {
 }
 
 export function highlightEdges(edges) {
-    // Highlights a set of edges
+    // Highlights a set of edges. Edges should be 0 indexed; they will be converted to 1 indexed. 
     console.log("fafdasfa", edges)
     cy.edges().forEach(edge => {
         console.log(edge.data("id"));

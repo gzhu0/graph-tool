@@ -85,6 +85,12 @@ body {
     text-align: center;
 }
 
+.button.active {
+    background: #333;
+    border-color: #333;
+    color: #fff;
+}
+
 .button:hover {
     background: #f0f0f0;
 }
